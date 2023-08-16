@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-# Ideally, run via sudo
+# Ideally, run via sudo -E
 
 echo "Stopping greenhouse service"
 systemctl stop greenhouse
@@ -10,7 +10,6 @@ git pull origin
 
 echo "Starting greenhouse service"
 systemctl start greenhouse
-
-echo "All done"
+systemctl status greenhouse
 
 
