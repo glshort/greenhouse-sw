@@ -1,0 +1,6 @@
+{
+  "Lighting": ["L1", "L2", "L3", "L4"],
+  "Cooling": ["F1", "F2"],
+  "Temperature": ["T1", "T2", "T3", "T4"],
+  "Humidity": ["H1", "H2", "H3", "H4"]
+}
