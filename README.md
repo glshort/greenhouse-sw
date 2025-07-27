@@ -1,7 +1,10 @@
 # Setup
 ### Preamble
- 1. Use the raspberry pi imager to flash a microsd for the pi, recommend 32GB and a Pi Zero 2W, 64-bit debian with no desktop
- 2. Edit the settings before flashing:
+ 1. Use the raspberry pi imager to flash a microsd for the pi, recommended:
+    - 32GB card
+    - Pi Zero 2 W
+    - 64-bit Raspberry-Pi OS Life (no desktop)
+ 3. Edit the settings before flashing:
     - Set the network name (I like `greenhouse1` and so on)
     - Configure wifi
     - Enable ssh access, either with credentials or ssh key
