@@ -14,10 +14,8 @@
  5.	sudo dpkg-reconfigure --priority=low unattended-upgrades
  7.	sudo nano /etc/systemd/journald.conf
     - uncomment `#SystemMaxUse=`
-    - set to 1G
+    - set to 45M
     - save & exit
-    - I don't actually know that this is required on account of log2ram below
-    - May also be bad to have differing sizes between this and the ram disk set up below? FIXME
  9.	systemctl restart systemd-journald
  10.	sudo apt-get install python3-pip
 ### log2ram
@@ -30,7 +28,7 @@
     - you'll need to reconnect after this
  8. rm -rf log2ram-master log2ram.tar.gz
  9. sudo nano /etc/log2ram.conf
-    - Set `SIZE=` to 40M
+    - Set `SIZE=` to 50M
     - save & exit
  11. sudo reboot
      - reconnect again
