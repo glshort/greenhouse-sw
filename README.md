@@ -18,7 +18,7 @@
     - save & exit
  9.	systemctl restart systemd-journald
  10.	sudo apt-get install python3-pip
-### log2ram
+### log2ram: https://github.com/azlux/log2ram
  1. sudo apt install rsync
  2. wget https://github.com/azlux/log2ram/archive/master.tar.gz -O log2ram.tar.gz
  3. tar xf log2ram.tar.gz
@@ -32,6 +32,18 @@
     - save & exit
  11. sudo reboot
      - reconnect again
+### pigpiod: https://abyz.me.uk/rpi/pigpio/pigpiod.html
+ 1. sudo apt-get install pigpio python-pigpio python3-pigpio
+    - And then none of the below until === here === FIXME
+ 1. wget https://github.com/joan2937/pigpio/archive/master.zip
+ 2. unzip master.zip
+ 3. cd pigpio-master
+ 4. make
+ 5. sudo make install
+ 6. cd ..
+ 7. sudo rm -rf master.zip pigpio-master
+ - === here === FIXME
+ 7. sudo pigpiod
 ### Greenhouse stuff itself
  1.	sudo apt-get install i2c-tools
 ### More to come
