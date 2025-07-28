@@ -20,7 +20,8 @@ sed -i -e 's/#\?SIZE=\w*/SIZE=50M/g' /etc/log2ram.conf
 
 # pigpiod
 apt install -qy pigpio python3-pigpio
-pigpiod
+systemctl enable pigpiod
+systemctl start pigpiod
 
 # fin
 echo '==============================================='
