@@ -1,6 +1,6 @@
 # Setup
 ### Preamble
- 1. Use the raspberry pi imager to flash a microsd for the pi, recommended:
+ 1. Use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to flash a microsd for the pi, recommended:
     - Pi Zero 2 W
     - 64-bit Raspberry-Pi OS Lite (no desktop)
     - 32GB card
