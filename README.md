@@ -2,7 +2,7 @@
 ### Preamble
  1. Use the raspberry pi imager to flash a microsd for the pi, recommended:
     - Pi Zero 2 W
-    - 64-bit Raspberry-Pi OS Life (no desktop)
+    - 64-bit Raspberry-Pi OS Lite (no desktop)
     - 32GB card
  3. Edit the settings before flashing:
     - Set the network name (I like `greenhouse1` and so on)
@@ -13,7 +13,7 @@
  1. Grab `install.sh` from this repo, dump that into a same-named file on the pi
  2. `chmod a+x install.sh`
  3. `sudo ./install.sh`
- 4. It should be fully automatic but there is at least one prompt that pops up that I can't get rid of yet
+ 4. It should be fully automatic but there is at least one prompt that might appear that I can't get rid of yet
  5. Godspeed
 ### More to come
  - actual SW setup for light control
