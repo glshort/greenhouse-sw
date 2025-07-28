@@ -13,7 +13,6 @@
  1. Grab `install.sh` from this repo, dump that into a same-named file on the pi
  2. `chmod a+x install.sh`
  3. `sudo ./install.sh`
- 4. It should be fully automatic but there is at least one prompt that might appear that I can't get rid of yet
  5. Godspeed
 ### More to come
  - actual SW setup for light control
