@@ -24,7 +24,7 @@ systemctl enable pigpiod
 systemctl start pigpiod
 
 # fin
-echo '==============================================='
+echo '===================================================='
 echo "System reboot recommended, please 'sudo reboot' now!"
-echo '==============================================='
+echo '===================================================='
 
