@@ -35,7 +35,5 @@ chown root:root greenhouse.cron
 mv greenhouse.cron /etc/cron.d/greenhouse
 
 # fin
-echo '===================================================='
-echo "System reboot recommended, please 'sudo reboot' now!"
-echo '===================================================='
+reboot
 
