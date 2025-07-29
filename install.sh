@@ -28,11 +28,11 @@ apt install -qy python3-tz
 wget -qO update_lights.py 'https://github.com/glshort/greenhouse-sw/blob/main/update_lights.py?raw=true'
 chmod 755 update_lights.py
 chown root:root update_lights.py
-mv update_lights.py /usr/local/sbin/
+mv update_lights.py /usr/local/sbin/update_lights
 wget -qO greenhouse.cron 'https://github.com/glshort/greenhouse-sw/blob/main/greenhouse.cron?raw=true'
 chmod 644 greenhouse.cron
 chown root:root greenhouse.cron
-mv greenhouse.cron /etc/cron.d/
+mv greenhouse.cron /etc/cron.d/greenhouse
 
 # fin
 echo '===================================================='
