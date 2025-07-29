@@ -118,7 +118,6 @@ def main():
   pi = pigpio.pi()
   pi.set_mode(5, pigpio.OUTPUT)
   pi.set_PWM_frequency(5, 1000)
-  pi.set_PWM_dutycycle(5, 0)
 
   time = get_faux_local_time(local_tz, target_coords)
 
