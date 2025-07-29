@@ -23,6 +23,17 @@ apt install -qy pigpio python3-pigpio
 systemctl enable pigpiod
 systemctl start pigpiod
 
+# greenhouse stuff
+apt install -qy python3-tz
+wget -qO update_lights.py 'https://github.com/glshort/greenhouse-sw/blob/main/update_lights.py?raw=true'
+chmod 755 update_lights.py
+chown root:root update_lights.py
+mv update_lights.py /usr/local/sbin/
+wget -qO greenhouse.cron 'https://github.com/glshort/greenhouse-sw/blob/main/greenhouse.cron?raw=true'
+chmod 644 greenhouse.cron
+chown root:root greenhouse.cron
+mv greenhouse.cron /etc/cron.d/
+
 # fin
 echo '===================================================='
 echo "System reboot recommended, please 'sudo reboot' now!"
