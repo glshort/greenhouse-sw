@@ -16,7 +16,7 @@ target_coords2 = {'lat': -2.221543, 'lng': -54.930931} # Somewhere along the Ama
 target_coords3 = {'lat': -39.173011, 'lng': 175.514709} # Gollum's Fishin' Hole
 
 # These should all be moved to a config and calibrated
-light_min = 60 # Light shuts off well above 0 dutycycle
+light_min = 65 # Light shuts off well above 0 dutycycle
 light_max = 255
 flux_min = 200 # Min light output before shutdown
 flux_max = 1000 # Max light output
@@ -67,8 +67,10 @@ def get_flux(time: datetime, coords: dict[str, float]) -> float:
 
 
 def flux_to_dutycycle(flux: float) -> int:
-  if(flux < flux_min):
+  if(flux <= 0):
     return(0)
+  if(flux > 0 and flux < flux_min):
+    return(light_min)
   if(flux > flux_max):
     return(light_max)
 
