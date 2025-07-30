@@ -25,6 +25,8 @@ systemctl start pigpiod
 
 # greenhouse stuff
 apt install -qy python3-tz
+# This next bit is super naughty but I don't feel like dealing with the quirks of virtualenv + system cron right now
+sudo pip3 install --break-system-packages timezonefinder
 wget -qO update_lights.py 'https://github.com/glshort/greenhouse-sw/blob/main/update_lights.py?raw=true'
 chmod 755 update_lights.py
 chown root:root update_lights.py
