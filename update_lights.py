@@ -5,7 +5,7 @@ import pytz
 # Need to decide if I want a virtualenv and pip it in or to find this via apt somewhere
 # Hard-coding values in-line for now
 # FIXME
-#from timezonefinder import TimezoneFinder
+from timezonefinder import TimezoneFinder
 import pigpio
 import pysolar.solar as pysolar
 
@@ -36,7 +36,7 @@ def get_faux_local_time(
   assert coords.get("lng", None) is not None
 
   local_tz = pytz.timezone(local_tz) # local time zone
-  target_tz = 'America/Chicago' #get_tz(coords) # FIXME
+  target_tz = get_tz(coords) # FIXME
 
   time = datetime.now(local_tz) # grab the actual local time
   time = time.replace(tzinfo=None) # naive-ify it
