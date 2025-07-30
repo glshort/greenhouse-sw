@@ -1,16 +1,13 @@
 #!/usr/bin/python
 
-import math
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
-import requests
 import pytz
 # Need to decide if I want a virtualenv and pip it in or to find this via apt somewhere
 # Hard-coding values in-line for now
 # FIXME
 #from timezonefinder import TimezoneFinder
-from time import sleep
 import pigpio
+import pysolar.solar as pysolar
 
 local_tz = 'America/Chicago'
 # Test locations, using the first one by default
@@ -18,8 +15,11 @@ target_coords = {'lat': 41.549570, 'lng': -93.924374} # Van Meter, IA
 target_coords2 = {'lat': -2.221543, 'lng': -54.930931} # Somewhere along the Amazon River
 target_coords3 = {'lat': -39.173011, 'lng': 175.514709} # Gollum's Fishin' Hole
 
-light_min = 50 # Light shuts off well above 0 dutycycle
+# These should all be moved to a config and calibrated
+light_min = 60 # Light shuts off well above 0 dutycycle
 light_max = 255
+flux_min = 200 # Min light output before shutdown
+flux_max = 1000 # Max light output
 
 def get_tz(coords: dict[str, float])->str:
   assert coords.get("lat", None) is not None
@@ -35,83 +35,49 @@ def get_faux_local_time(
   assert coords.get("lat", None) is not None
   assert coords.get("lng", None) is not None
 
-  tz = pytz.timezone(local_tz) # actual local time zone
+  local_tz = pytz.timezone(local_tz) # local time zone
   target_tz = 'America/Chicago' #get_tz(coords) # FIXME
 
-  # Grab the local time and move it to the make-believe time zone without actually adjusting
-  time = datetime.now(tz)
-  time = time.replace(tzinfo=None)
-  faux_tz = pytz.timezone(target_tz)
-  time = faux_tz.localize(time)
+  time = datetime.now(local_tz) # grab the actual local time
+  time = time.replace(tzinfo=None) # naive-ify it
+  time = pytz.timezone(target_tz).localize(time) # fake it to the target time zone
   return(time)
 
-def get_light_data(
-    coords: dict[str, float],
-    date: datetime | None = None,
-) -> dict[str, str] | None:
-    """Returns solar rise/zenith/set data from an API.
 
-    Args:
-        coords (dict[str, float]): REQUIRED. Latitude and Longitude coordinates of the location of
-        solar movement. Required structure is {"lat": <float>, "long": <float>}
+def get_flux(time: datetime, coords: dict[str, float]) -> float:
+  assert coords.get("lat", None) is not None
+  assert coords.get("lng", None) is not None
 
-        date (datetime.datetime | None): OPTIONAL. The date of the solar data. If
-        timezone-naive, this is assumed to be UTC
+  elevation = pysolar.get_altitude(
+    target_coords['lat'],
+    target_coords['lng'],
+    time)
 
-    Returns:
-        dict[str, str]: the JSON solar data returned by the API
-    """
-    assert coords.get("lat", None) is not None
-    assert coords.get("lng", None) is not None
+  azimuth = pysolar.get_azimuth(
+    target_coords['lat'],
+    target_coords['lng'],
+    time)
 
-    if date is None:
-        date = datetime.now(timezone.utc)
+  if elevation > 0:
+    flux = pysolar.radiation.get_radiation_direct(time, elevation)
+  else:
+    flux = 0
 
-    if date.tzinfo is not None:
-        date = date.astimezone(timezone.utc)
-    
-    api_url = 'https://api.sunrise-sunset.org/json'
-    ret = requests.get(api_url, params={
-        'lat': coords['lat'],
-        'lng': coords['lng'],
-        'date': date.date(),
-        'tzid': date.tzinfo
-    })
-    if not ret.status_code == 200:
-        raise RuntimeError(f"The API request was unsucessful: {ret.status_code} {ret}")
+  return(flux, elevation, azimuth)
 
-    return ret.json().get("results")
 
-def times_to_datetimes(
-    light_data: dict[str, str], time: datetime
-) -> tuple[datetime, datetime]:
-    sunrise_datetime: datetime = datetime.strptime(
-        f"{time.date().isoformat()} {light_data['sunrise']}", "%Y-%m-%d %I:%M:%S %p"
-    )
-    sunrise_datetime = sunrise_datetime.replace(tzinfo=ZoneInfo("UTC"))
+def flux_to_dutycycle(flux: float) -> int:
+  min_duty = 60
+  max_duty = 255
+  min_flux = 200
+  max_flux = 1000
 
-    sunset_datetime: datetime = datetime.strptime(
-        f"{time.date().isoformat()} {light_data['sunset']}", "%Y-%m-%d %I:%M:%S %p"
-    )
-    sunset_datetime = sunset_datetime.replace(tzinfo=ZoneInfo("UTC"))
+  if(flux < min_flux):
+    return(0)
+  if(flux > max_flux):
+    return(max_flux)
 
-    if sunset_datetime <= sunrise_datetime:
-        sunset_datetime = sunset_datetime + timedelta(days=1)
-
-    return sunrise_datetime, sunset_datetime
-
-def get_light_curve_point(
-    sunrise_datetime: datetime, sunset_datetime: datetime, time: datetime
-) -> float:
-    """
-    """
-    day_len_seconds = (sunset_datetime - sunrise_datetime).total_seconds()
-
-    if time > sunrise_datetime and time < sunset_datetime:
-        time_after_sunrise_seconds = (sunset_datetime - time).total_seconds()
-        return math.sin(math.pi * time_after_sunrise_seconds / day_len_seconds)
-    else:
-        return 0.0
+  return(int(((flux - min_flux) / (max_flux - min_flux)) * (max_duty - min_duty) + min_duty))
 
 
 def main():
@@ -120,16 +86,10 @@ def main():
   pi.set_PWM_frequency(5, 1000)
 
   time = get_faux_local_time(local_tz, target_coords)
+  flux, elevation, azimuth = get_flux(time, target_coords)
+  duty = flux_to_dutycycle(flux)
 
-  light = get_light_data(target_coords, time)
-  if light is None:
-    print("Something is wrong with the sunrise-sunset API response")
-    return()
-
-  sunrise_datetime, sunset_datetime = times_to_datetimes(light, time)
-  light_level = get_light_curve_point(sunrise_datetime, sunset_datetime, time)
-  dutycycle = int((light_max - light_min) * light_level + light_min)
-  pi.set_PWM_dutycycle(5, dutycycle)
+  pi.set_PWM_dutycycle(5, duty)
 
 
 if __name__ == "__main__":
