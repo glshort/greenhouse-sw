@@ -1,0 +1,49 @@
+{
+  "local_tz": "America/Chicago",
+  "target_location": {
+    "lat": 41.549570,
+    "lng": -93.924374
+  },
+  "lights": [
+    {
+      "name": "Light 1",
+      "active": true,
+      "pin": 5,
+      "frequency": 1000,
+      "duty_min": 65,
+      "duty_max": 255,
+      "flux_min": 200,
+      "flux_max": 1000
+    },
+    {
+      "name": "Light 2",
+      "active": true,
+      "pin": 6,
+      "frequency": 1000,
+      "duty_min": 65,
+      "duty_max": 255,
+      "flux_min": 200,
+      "flux_max": 1000
+    },
+    {
+      "name": "Light 3",
+      "active": true,
+      "pin": 13,
+      "frequency": 1000,
+      "duty_min": 65,
+      "duty_max": 255,
+      "flux_min": 200,
+      "flux_max": 1000
+    },
+    {
+      "name": "Light 4",
+      "active": true,
+      "pin": 26,
+      "frequency": 1000,
+      "duty_min": 65,
+      "duty_max": 255,
+      "flux_min": 200,
+      "flux_max": 1000
+    }
+  ]
+}
