@@ -1,31 +1,20 @@
 #!/usr/bin/python
 
-from datetime import datetime, timedelta, timezone
+import json
+import warnings
+from datetime import datetime, timezone
 import pytz
-# Need to decide if I want a virtualenv and pip it in or to find this via apt somewhere
-# Hard-coding values in-line for now
-# FIXME
 from timezonefinder import TimezoneFinder
 import pigpio
 import pysolar.solar as pysolar
 
-local_tz = 'America/Chicago'
-# Test locations, using the first one by default
-target_coords = {'lat': 41.549570, 'lng': -93.924374} # Van Meter, IA
-target_coords2 = {'lat': -2.221543, 'lng': -54.930931} # Somewhere along the Amazon River
-target_coords3 = {'lat': -39.173011, 'lng': 175.514709} # Gollum's Fishin' Hole
-
-# These should all be moved to a config and calibrated
-light_min = 65 # Light shuts off well above 0 dutycycle
-light_max = 255
-flux_min = 200 # Min light output before shutdown
-flux_max = 1000 # Max light output
 
 def get_tz(coords: dict[str, float])->str:
   assert coords.get("lat", None) is not None
   assert coords.get("lng", None) is not None
   tf = TimezoneFinder()
   return(tf.certain_timezone_at(lat=coords['lat'], lng=coords['lng']))
+
 
 def get_faux_local_time(
     local_tz: str,
@@ -36,7 +25,7 @@ def get_faux_local_time(
   assert coords.get("lng", None) is not None
 
   local_tz = pytz.timezone(local_tz) # local time zone
-  target_tz = get_tz(coords) # FIXME
+  target_tz = get_tz(coords)
 
   time = datetime.now(local_tz) # grab the actual local time
   time = time.replace(tzinfo=None) # naive-ify it
@@ -49,13 +38,13 @@ def get_flux(time: datetime, coords: dict[str, float]) -> float:
   assert coords.get("lng", None) is not None
 
   elevation = pysolar.get_altitude(
-    target_coords['lat'],
-    target_coords['lng'],
+    coords['lat'],
+    coords['lng'],
     time)
 
   azimuth = pysolar.get_azimuth(
-    target_coords['lat'],
-    target_coords['lng'],
+    coords['lat'],
+    coords['lng'],
     time)
 
   if elevation > 0:
@@ -66,27 +55,50 @@ def get_flux(time: datetime, coords: dict[str, float]) -> float:
   return(flux, elevation, azimuth)
 
 
-def flux_to_dutycycle(flux: float) -> int:
+def flux_to_dutycycle(
+    flux: float,
+    flux_min: float,
+    flux_max: float,
+    duty_min: int,
+    duty_max: int
+    ) -> int:
   if(flux <= 0):
     return(0)
   if(flux > 0 and flux < flux_min):
-    return(light_min)
+    return(duty_min)
   if(flux > flux_max):
-    return(light_max)
+    return(duty_max)
 
-  return(int(((flux - flux_min) / (flux_max - flux_min)) * (light_max - light_min) + light_min))
+  return(int(((flux - flux_min) / (flux_max - flux_min)) * (duty_max - duty_min) + duty_min))
 
 
 def main():
+  warnings.filterwarnings("ignore", category=UserWarning)
+
+  with open('/usr/local/etc/greenhouse/config.json', 'r') as f:
+    config = json.load(f)
+
+  time = get_faux_local_time(config['local_tz'], config['target_location'])
+  flux, elevation, azimuth = get_flux(time, config['target_location'])
+
   pi = pigpio.pi()
-  pi.set_mode(5, pigpio.OUTPUT)
-  pi.set_PWM_frequency(5, 1000)
 
-  time = get_faux_local_time(local_tz, target_coords)
-  flux, elevation, azimuth = get_flux(time, target_coords)
-  duty = flux_to_dutycycle(flux)
-
-  pi.set_PWM_dutycycle(5, duty)
+  for light in config['lights']:
+    pi.set_mode(light['pin'], pigpio.OUTPUT)
+    pi.set_PWM_frequency(light['pin'], light['frequency'])
+    if(not light['active']):
+      #print(f'Setting {light["name"]} to 0/{light["duty_max"]} (inactive)')
+      pi.set_PWM_dutycycle(light['pin'], 0)
+    else:
+      duty = flux_to_dutycycle(
+        flux,
+        light['flux_min'],
+        light['flux_max'],
+        light['duty_min'],
+        light['duty_max']
+        )
+      #print(f'Setting {light["name"]} to {duty}/{light["duty_max"]}')
+      pi.set_PWM_dutycycle(light['pin'], duty)
 
 
 if __name__ == "__main__":
