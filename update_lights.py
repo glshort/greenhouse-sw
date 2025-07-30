@@ -67,17 +67,12 @@ def get_flux(time: datetime, coords: dict[str, float]) -> float:
 
 
 def flux_to_dutycycle(flux: float) -> int:
-  min_duty = 60
-  max_duty = 255
-  min_flux = 200
-  max_flux = 1000
-
-  if(flux < min_flux):
+  if(flux < flux_min):
     return(0)
-  if(flux > max_flux):
-    return(max_flux)
+  if(flux > flux_max):
+    return(light_max)
 
-  return(int(((flux - min_flux) / (max_flux - min_flux)) * (max_duty - min_duty) + min_duty))
+  return(int(((flux - flux_min) / (flux_max - flux_min)) * (light_max - light_min) + light_min))
 
 
 def main():
