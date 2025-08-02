@@ -59,7 +59,7 @@ def flux_to_ppfd(flux):
   return flux * 0.45
 
 
-def ppfd_to_duty_cycle(
+def ppfd_to_dutycycle(
     ppfd: float,
     ppfd_min: float,
     ppfd_max: float,
@@ -70,26 +70,9 @@ def ppfd_to_duty_cycle(
   if(ppfd > 0 and ppfd < ppfd_min):
     return(duty_min)
   if(ppfd > ppfd_max):
-    return(ppfd_max)
-
-  return(int(((ppfd - ppfd_min) / (ppfd_max - ppfd_min) * (duty_max - duty_min) + duty_min))
-
-
-def flux_to_dutycycle(
-    flux: float,
-    flux_min: float,
-    flux_max: float,
-    duty_min: int,
-    duty_max: int
-    ) -> int:
-  if(flux <= 0):
-    return(0)
-  if(flux > 0 and flux < flux_min):
-    return(duty_min)
-  if(flux > flux_max):
     return(duty_max)
 
-  return(int(((flux - flux_min) / (flux_max - flux_min)) * (duty_max - duty_min) + duty_min))
+  return(int(((ppfd - ppfd_min) / (ppfd_max - ppfd_min) * (duty_max - duty_min) + duty_min)))
 
 
 def main():
