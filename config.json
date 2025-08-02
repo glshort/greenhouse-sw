@@ -10,40 +10,40 @@
       "active": true,
       "pin": 5,
       "frequency": 1000,
-      "duty_min": 65,
+      "duty_min": 71,
       "duty_max": 255,
-      "flux_min": 200,
-      "flux_max": 1000
+      "ppfd_min": 30,
+      "ppfd_max": 700
     },
     {
       "name": "Light 2",
-      "active": true,
+      "active": false,
       "pin": 6,
       "frequency": 1000,
-      "duty_min": 65,
+      "duty_min": 63,
       "duty_max": 255,
-      "flux_min": 200,
-      "flux_max": 1000
+      "ppfd_min": 30,
+      "ppfd_max": 700
     },
     {
       "name": "Light 3",
-      "active": true,
+      "active": false,
       "pin": 13,
       "frequency": 1000,
-      "duty_min": 65,
+      "duty_min": 26,
       "duty_max": 255,
-      "flux_min": 200,
-      "flux_max": 1000
+      "ppfd_min": 30,
+      "ppfd_max": 700
     },
     {
       "name": "Light 4",
-      "active": true,
+      "active": false,
       "pin": 26,
       "frequency": 1000,
-      "duty_min": 65,
+      "duty_min": 48,
       "duty_max": 255,
-      "flux_min": 200,
-      "flux_max": 1000
+      "ppfd_min": 30,
+      "ppfd_max": 700
     }
   ]
 }
