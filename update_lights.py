@@ -55,6 +55,26 @@ def get_flux(time: datetime, coords: dict[str, float]) -> float:
   return(flux, elevation, azimuth)
 
 
+def flux_to_ppfd(flux):
+  return flux * 0.45
+
+
+def ppfd_to_duty_cycle(
+    ppfd: float,
+    ppfd_min: float,
+    ppfd_max: float,
+    duty_min: int,
+    duty_max: int) -> int:
+  if(ppfd <= 0):
+    return(0)
+  if(ppfd > 0 and ppfd < ppfd_min):
+    return(duty_min)
+  if(ppfd > ppfd_max):
+    return(ppfd_max)
+
+  return(int(((ppfd - ppfd_min) / (ppfd_max - ppfd_min) * (duty_max - duty_min) + duty_min))
+
+
 def flux_to_dutycycle(
     flux: float,
     flux_min: float,
@@ -80,6 +100,7 @@ def main():
 
   time = get_faux_local_time(config['local_tz'], config['target_location'])
   flux, elevation, azimuth = get_flux(time, config['target_location'])
+  ppfd = flux_to_ppfd(flux)
 
   pi = pigpio.pi()
 
@@ -90,10 +111,10 @@ def main():
       #print(f'Setting {light["name"]} to 0/{light["duty_max"]} (inactive)')
       pi.set_PWM_dutycycle(light['pin'], 0)
     else:
-      duty = flux_to_dutycycle(
+      duty = ppfd_to_dutycycle(
         flux,
-        light['flux_min'],
-        light['flux_max'],
+        light['ppfd_min'],
+        light['ppfd_max'],
         light['duty_min'],
         light['duty_max']
         )
